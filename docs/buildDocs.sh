@@ -34,7 +34,7 @@ make -C docs clean
 mapfile -t versions < <(git tag)
 versions=("master" "${versions[@]}") 
 
-for current_version in versions; do
+for current_version in ${versions[@]}; do
    export current_version
    git checkout ${current_version}
  
@@ -91,7 +91,7 @@ EOF
 # Add README
 cat > README.md <<EOF
 # GitHub Pages Cache
-   
+ 
 Nothing to see here. The contents of this branch are essentially a cache that's not intended to be viewed on github.com.
  
  
