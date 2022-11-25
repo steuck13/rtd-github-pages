@@ -46,7 +46,7 @@ for current_version in ${versions[@]}; do
    fi
  
    # HTML #
-   sphinx-build -b html docs/ docs/_build/html/${current_language}/${current_version} -D language="${current_language}"
+   sphinx-build -b html docs/ docs/_build/html/${current_version}
 
    # copy the static assets produced by the above build into our docroot
    rsync -av "docs/_build/html/" "${docroot}/" 
