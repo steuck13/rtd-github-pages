@@ -1,17 +1,6 @@
 #!/bin/bash
 set -x
-################################################################################
-# File:    buildDocs.sh
-# Purpose: Script that builds our documentation using sphinx and updates GitHub
-#          Pages. This script is executed by:
-#            .github/workflows/docs_pages_workflow.yml
-#
-# Authors: Michael Altfield <michael@michaelaltfield.net>
-# Created: 2020-07-17
-# Updated: 2020-07-20
-# Version: 0.2
-################################################################################
- 
+
 ###################
 # INSTALL DEPENDS #
 ###################
@@ -42,10 +31,9 @@ export REPO_NAME="${GITHUB_REPOSITORY##*/}"
 make -C docs clean
  
 # get a list of branches, excluding 'HEAD' and 'gh-pages'
-versions="`git for-each-ref '--format=%(refname:lstrip=-1)' refs/remotes/origin/ | grep -viE '^(HEAD|gh-pages)$'`"
-for current_version in ${versions}; do
- 
-   # make the current language available to conf.py
+mapfile -t versions < <(git tag)
+versions=("master" "${versions[@]}")
+for current_version in ${versions[@]}; do
    export current_version
    git checkout ${current_version}
  
@@ -57,35 +45,11 @@ for current_version in ${versions}; do
       continue
    fi
  
-   languages="en `find docs/locales/ -mindepth 1 -maxdepth 1 -type d -exec basename '{}' \;`"
-   for current_language in ${languages}; do
- 
-      # make the current language available to conf.py
-      export current_language
- 
-      ##########
-      # BUILDS #
-      ##########
-      echo "INFO: Building for ${current_language}"
- 
-      # HTML #
-      sphinx-build -b html docs/ docs/_build/html/${current_language}/${current_version} -D language="${current_language}"
- 
-      # PDF #
-      sphinx-build -b rinoh docs/ docs/_build/rinoh -D language="${current_language}"
-      mkdir -p "${docroot}/${current_language}/${current_version}"
-      cp "docs/_build/rinoh/target.pdf" "${docroot}/${current_language}/${current_version}/helloWorld-docs_${current_language}_${current_version}.pdf"
- 
-      # EPUB #
-      sphinx-build -b epub docs/ docs/_build/epub -D language="${current_language}"
-      mkdir -p "${docroot}/${current_language}/${current_version}"
-      cp "docs/_build/epub/target.epub" "${docroot}/${current_language}/${current_version}/helloWorld-docs_${current_language}_${current_version}.epub"
- 
-      # copy the static assets produced by the above build into our docroot
-      rsync -av "docs/_build/html/" "${docroot}/"
- 
-   done
- 
+   # HTML #
+   sphinx-build -b html docs/ docs/_build/html/${current_language}/${current_version} -D language="${current_language}"
+
+   # copy the static assets produced by the above build into our docroot
+   rsync -av "docs/_build/html/" "${docroot}/" 
 done
  
 # return to master branch
