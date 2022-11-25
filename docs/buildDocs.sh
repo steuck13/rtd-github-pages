@@ -33,8 +33,8 @@ make -C docs clean
 # get a list of branches, excluding 'HEAD' and 'gh-pages'
 mapfile -t versions < <(git tag)
 versions=("master" "${versions[@]}")
-echo ${versions[@]}
-for current_version in ${versions}; do
+
+for current_version in versions; do
    export current_version
    git checkout ${current_version}
  
